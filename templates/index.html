@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es" dir="ltr">
+<head>
+    <title>Reconocimiento facial</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href={{ css_path }} type="text/css">
+    <!--[if lt IE 9]><script src="scripts/html5shiv.js"></script><![endif]-->
+</head>
+<body>
+<div class="wrapper row1">
+    <header id="header" class="clear">
+        <div id="hgroup">
+            <h1><a href="#">Reconocimiento Facial</a></h1>
+            <h2>Daniel Rodriguez - Fabian Chacón</h2>
+        </div>
+    </header>
+</div>
+<!-- content -->
+<div class="wrapper row2">
+    <div id="container" class="clear">
+        <!-- Slider -->
+        <section id="slider"><a href="#"><img src={{ image }} alt={{ image }} width="630"></a></section>
+        <!-- main content -->
+        <div id="homepage">
+            <!-- Services -->
+            <section id="services" class="clear">
+                <article class="one_third">
+                    <form enctype="multipart/form-data" method="POST" action="/upload">
+                        Elige la imagen: <input type="file" name="photo"/><BR>
+                        <input type="submit" name="Upload"/>
+                    </form>
+                </article>
+                <article class="one_third">
+                    <figcaption>
+                        <h2>Resultado</h2>
+                        <p>{{ mensaje }}</p>
+                    </figcaption>
+                </article>
+            </section>
+        </div>
+        <!-- Copyright -->
+        <div class="wrapper row4">
+            <footer id="copyright" class="clear">
+                <p class="fl_left">Copyright &copy; 2019 - All Rights Reserved</p>
+            </footer>
+        </div>
+</body>
+</html>

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Reconocimiento Facial</title>
+</head>
+<body>
+<h1>Image Uploader</h1>
+<form enctype="multipart/form-data" method="POST" action="/upload">
+    Choose the file: <input type="file" name="photo"/><BR>
+    <input type="submit" name="Upload"/>
+</form>
+{{ mensaje }}
+<br><br>
+<img src="static/images/{{image}}" alt="{{image}}" width="700">
+</body>
+</html>

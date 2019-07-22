@@ -1,0 +1,15 @@
+./../pre_img\daniel.rodriguez\ActiOn_1.png 507 1025 2466 3734
+./../pre_img\daniel.rodriguez\ActiOn_2.png 1035 1048 2958 3553
+./../pre_img\daniel.rodriguez\ActiOn_3.png 977 1070 2805 3572
+./../pre_img\daniel.rodriguez\ActiOn_4.png 624 1081 2585 3719
+./../pre_img\daniel.rodriguez\ActiOn_5.png 1068 1122 2873 3549
+./../pre_img\daniel.rodriguez\ActiOn_6.png 557 1153 2313 3482
+./../pre_img\daniel.rodriguez\ActiOn_7.png 928 1213 2657 3443
+./../pre_img\fabian.chacon\1.png 292 178 508 410
+./../pre_img\fabian.chacon\2.png 233 431 498 767
+./../pre_img\fabian.chacon\3.png 258 219 577 707
+./../pre_img\fabian.chacon\4.png 301 374 600 779
+./../pre_img\fabian.chacon\5.png 264 228 580 701
+./../pre_img\fabian.chacon\6.png 199 326 473 727
+./../pre_img\fabian.chacon\7.png 369 279 671 685
+./../pre_img\fabian.chacon\8.png 258 258 597 723

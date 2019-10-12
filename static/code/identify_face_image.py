@@ -10,12 +10,14 @@ from static.code import detect_face
 import os
 import time
 import pickle
+import datetime
 import sys
 
 
 class identify_face:
 
     def __init__(self, path):
+        print(str(datetime.datetime.utcnow()) + ' - Inicio identify')
         self.img_path = path
 
     def identify(self):
@@ -28,6 +30,7 @@ class identify_face:
         # train_img = "../train_img"
         train_img = os.path.join(os.path.dirname(__file__), '..', 'train_img')
         mensaje = list()
+        print(str(datetime.datetime.utcnow()) + ' - identify 1')
         with tf.Graph().as_default():
             gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.6)
             sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options, log_device_placement=False))
@@ -45,10 +48,10 @@ class identify_face:
 
                 HumanNames = os.listdir(train_img)
                 HumanNames.sort()
-
+                print(str(datetime.datetime.utcnow()) + ' - identify 2')
                 print('Loading feature extraction model')
                 facenet.load_model(modeldir)
-
+                print(str(datetime.datetime.utcnow()) + ' - identify 3')
                 images_placeholder = tf.get_default_graph().get_tensor_by_name("input:0")
                 embeddings = tf.get_default_graph().get_tensor_by_name("embeddings:0")
                 phase_train_placeholder = tf.get_default_graph().get_tensor_by_name("phase_train:0")
@@ -60,7 +63,7 @@ class identify_face:
 
                 # video_capture = cv2.VideoCapture("akshay_mov.mp4")
                 c = 0
-
+                print(str(datetime.datetime.utcnow()) + ' - reco 1')
                 print('Start Recognition!')
                 prevTime = 0
                 # ret, frame = video_capture.read()
@@ -112,6 +115,7 @@ class identify_face:
                             scaled_reshape.append(scaled[i].reshape(-1, input_image_size, input_image_size, 3))
                             feed_dict = {images_placeholder: scaled_reshape[i], phase_train_placeholder: False}
                             emb_array[0, :] = sess.run(embeddings, feed_dict=feed_dict)
+                            print(str(datetime.datetime.utcnow()) + ' - reco 2')
                             predictions = model.predict_proba(emb_array)
                             print(predictions)
                             best_class_indices = np.argmax(predictions, axis=1)
@@ -119,6 +123,7 @@ class identify_face:
                             best_class_probabilities = predictions[
                                 np.arange(len(best_class_indices)), best_class_indices]
                             print(best_class_probabilities)
+                            print(str(datetime.datetime.utcnow()) + ' - reco 3')
                             if float(best_class_probabilities[0]) > float(0.5):
                                 cv2.rectangle(frame, (bb[i][0], bb[i][1]), (bb[i][2], bb[i][3]), (0, 255, 0),
                                               2)  # boxing face

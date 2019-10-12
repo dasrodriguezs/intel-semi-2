@@ -1,3 +1,4 @@
+import datetime
 import os
 from flask import Flask, request, render_template, url_for, redirect
 from static.code.identify_face_image import identify_face
@@ -22,13 +23,16 @@ def index_page():
 @app.route("/upload", methods=['POST'])
 def upload():
     if 'photo' in request.files:
+        print(str(datetime.datetime.utcnow()) + ' - prin 1')
         photo = request.files['photo']
         if photo.filename != '':
             last_file = os.path.join('static', 'images', photo.filename)
             location = os.path.join('static', 'images', photo.filename)
             photo.save(last_file)
             algo.img_path = location
+            print(str(datetime.datetime.utcnow()) + ' - prin 2')
             mensaje = algo.identify()
+            print(str(datetime.datetime.utcnow()) + ' - prin 3')
             last = os.path.join('static', 'images', str(photo.filename).replace('.', '') + 'last.jpg')
             print(last)
             print(mensaje)

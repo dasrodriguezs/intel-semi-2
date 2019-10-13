@@ -34,9 +34,10 @@ class identify_face:
 
     @property
     def identify(self):
+        mensaje = dict()
+        mensaje['list'] = []
         classifier_filename = os.path.join(os.path.dirname(__file__), 'class', 'classifier.pkl')
         train_img = os.path.join(os.path.dirname(__file__), '..', 'train_img')
-        mensaje = list()
         with tf.Graph().as_default():
             with self.sess.as_default():
                 minsize = 20  # minimum size of face
@@ -112,10 +113,10 @@ class identify_face:
                                     # print(H_i)
                                     if HumanNames[best_class_indices[0]] == H_i:
                                         result_names = HumanNames[best_class_indices[0]]
-                                        mensaje = {
+                                        mensaje['list'].append({
                                             'name': result_names,
                                             'proba': best_class_probabilities[0]
-                                        }
+                                        })
                     else:
                         print(str(datetime.datetime.utcnow()) + 'Unable to align')
                 os.remove(self.img_path)

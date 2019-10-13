@@ -18,8 +18,12 @@ def upload():
             photo.save(last_file)
             algo.img_path = location
             mensaje = algo.identify
-            if mensaje.get('proba') > 0.5:
-                return jsonify(mensaje), 200
+            aut = {'list':[]}
+            for obj in mensaje.get('list'):
+                if obj.get('proba') > 0.5:
+                    aut.get('list').append(obj)
+            if len(aut.get('list')) > 1:
+                return jsonify(aut), 200
             else:
                 return jsonify(mensaje), 403
         return jsonify({'error': 'no photo provided'}), 400

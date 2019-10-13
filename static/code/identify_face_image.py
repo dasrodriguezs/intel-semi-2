@@ -8,35 +8,37 @@ import numpy as np
 from static.code import facenet
 from static.code import detect_face
 import os
-import time
 import pickle
 import datetime
-import sys
 
 
 class identify_face:
 
     def __init__(self, path):
-        print(str(datetime.datetime.utcnow()) + ' - Inicio identify')
         self.img_path = path
-
-    def identify(self):
-        # modeldir = './model/20170511-185253.pb'
         modeldir = os.path.join(os.path.dirname(__file__), 'model', '20170511-185253.pb')
-        # classifier_filename = './class/classifier.pkl'
-        classifier_filename = os.path.join(os.path.dirname(__file__), 'class', 'classifier.pkl')
-        # npy = './npy'
         npy = os.path.join(os.path.dirname(__file__), 'npy')
-        # train_img = "../train_img"
         train_img = os.path.join(os.path.dirname(__file__), '..', 'train_img')
-        mensaje = list()
-        print(str(datetime.datetime.utcnow()) + ' - identify 1')
         with tf.Graph().as_default():
             gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.6)
-            sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options, log_device_placement=False))
-            with sess.as_default():
-                pnet, rnet, onet = detect_face.create_mtcnn(sess, npy)
+            self.sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options, log_device_placement=False))
+            with self.sess.as_default():
+                self.pnet, self.rnet, self.onet = detect_face.create_mtcnn(self.sess, npy)
+                HumanNames = os.listdir(train_img)
+                HumanNames.sort()
+                print(str(datetime.datetime.utcnow()) + 'Loading feature extraction model')
+                facenet.load_model(modeldir)
+                self.images_placeholder = tf.get_default_graph().get_tensor_by_name("input:0")
+                self.embeddings = tf.get_default_graph().get_tensor_by_name("embeddings:0")
+                self.phase_train_placeholder = tf.get_default_graph().get_tensor_by_name("phase_train:0")
 
+    @property
+    def identify(self):
+        classifier_filename = os.path.join(os.path.dirname(__file__), 'class', 'classifier.pkl')
+        train_img = os.path.join(os.path.dirname(__file__), '..', 'train_img')
+        mensaje = list()
+        with tf.Graph().as_default():
+            with self.sess.as_default():
                 minsize = 20  # minimum size of face
                 threshold = [0.6, 0.7, 0.7]  # three steps's threshold
                 factor = 0.709  # scale factor
@@ -48,41 +50,24 @@ class identify_face:
 
                 HumanNames = os.listdir(train_img)
                 HumanNames.sort()
-                print(str(datetime.datetime.utcnow()) + ' - identify 2')
-                print('Loading feature extraction model')
-                facenet.load_model(modeldir)
-                print(str(datetime.datetime.utcnow()) + ' - identify 3')
-                images_placeholder = tf.get_default_graph().get_tensor_by_name("input:0")
-                embeddings = tf.get_default_graph().get_tensor_by_name("embeddings:0")
-                phase_train_placeholder = tf.get_default_graph().get_tensor_by_name("phase_train:0")
-                embedding_size = embeddings.get_shape()[1]
+                embedding_size = self.embeddings.get_shape()[1]
 
                 classifier_filename_exp = os.path.expanduser(classifier_filename)
                 with open(classifier_filename_exp, 'rb') as infile:
                     (model, class_names) = pickle.load(infile)
 
-                # video_capture = cv2.VideoCapture("akshay_mov.mp4")
                 c = 0
-                print(str(datetime.datetime.utcnow()) + ' - reco 1')
-                print('Start Recognition!')
-                prevTime = 0
-                # ret, frame = video_capture.read()
+                print(str(datetime.datetime.utcnow()) + ' Start Recognition!')
                 frame = cv2.imread(self.img_path, 0)
-
-                #        frame = cv2.resize(frame, (0, 0), fx=0.5, fy=0.5)  # resize frame (optional)
-
-                curTime = time.time() + 1  # calc fps
                 timeF = frame_interval
 
                 if c % timeF == 0:
-                    find_results = []
-
                     if frame.ndim == 2:
                         frame = facenet.to_rgb(frame)
                     frame = frame[:, :, 0:3]
-                    bounding_boxes, _ = detect_face.detect_face(frame, minsize, pnet, rnet, onet, threshold, factor)
+                    bounding_boxes, _ = detect_face.detect_face(frame, minsize, self.pnet, self.rnet, self.onet, threshold, factor)
                     nrof_faces = bounding_boxes.shape[0]
-                    print('Face Detected: %d' % nrof_faces)
+                    print(str(datetime.datetime.utcnow()) + ' Face Detected: %d' % nrof_faces)
 
                     if nrof_faces > 0:
                         det = bounding_boxes[:, 0:4]
@@ -92,7 +77,6 @@ class identify_face:
                         scaled = []
                         scaled_reshape = []
                         bb = np.zeros((nrof_faces, 4), dtype=np.int32)
-
                         for i in range(nrof_faces):
                             emb_array = np.zeros((1, embedding_size))
 
@@ -103,7 +87,7 @@ class identify_face:
 
                             # inner exception
                             if bb[i][0] <= 0 or bb[i][1] <= 0 or bb[i][2] >= len(frame[0]) or bb[i][3] >= len(frame):
-                                print('face is too close')
+                                print(str(datetime.datetime.utcnow()) + ' face is too close')
                                 continue
 
                             cropped.append(frame[bb[i][1]:bb[i][3], bb[i][0]:bb[i][2], :])
@@ -113,50 +97,28 @@ class identify_face:
                                                    interpolation=cv2.INTER_CUBIC)
                             scaled[i] = facenet.prewhiten(scaled[i])
                             scaled_reshape.append(scaled[i].reshape(-1, input_image_size, input_image_size, 3))
-                            feed_dict = {images_placeholder: scaled_reshape[i], phase_train_placeholder: False}
-                            emb_array[0, :] = sess.run(embeddings, feed_dict=feed_dict)
-                            print(str(datetime.datetime.utcnow()) + ' - reco 2')
+                            feed_dict = {self.images_placeholder: scaled_reshape[i], self.phase_train_placeholder: False}
+                            emb_array[0, :] = self.sess.run(self.embeddings, feed_dict=feed_dict)
+
                             predictions = model.predict_proba(emb_array)
-                            print(predictions)
+                            print(str(datetime.datetime.utcnow()) + 'Predictions: ' + str(predictions))
                             best_class_indices = np.argmax(predictions, axis=1)
-                            # print(best_class_indices)
                             best_class_probabilities = predictions[
                                 np.arange(len(best_class_indices)), best_class_indices]
-                            print(best_class_probabilities)
-                            print(str(datetime.datetime.utcnow()) + ' - reco 3')
                             if float(best_class_probabilities[0]) > float(0.5):
-                                cv2.rectangle(frame, (bb[i][0], bb[i][1]), (bb[i][2], bb[i][3]), (0, 255, 0),
-                                              2)  # boxing face
 
-                                # plot result idx under box
-                                text_x = bb[i][0]
-                                text_y = bb[i][3] + 25
-                                print('Result Indices: ', best_class_indices[0])
-
-                                print(HumanNames)
+                                print(str(datetime.datetime.utcnow()) + ' Result Indices: ', best_class_indices[0])
                                 for H_i in HumanNames:
                                     # print(H_i)
                                     if HumanNames[best_class_indices[0]] == H_i:
                                         result_names = HumanNames[best_class_indices[0]]
-                                        mensaje.append(
-                                            'En la imagen se encuentra: ' + result_names + '\nCon una probabilidad de: '
-                                            + str(best_class_probabilities[0])[0:5])
-                                        cv2.putText(frame, str(result_names), (text_x, text_y),
-                                                    cv2.FONT_HERSHEY_COMPLEX_SMALL,
-                                                    1, (0, 0, 255), thickness=1, lineType=2)
-                                        cv2.putText(frame, str(best_class_probabilities[0])[0:5], (text_x, text_y + 20),
-                                                    cv2.FONT_HERSHEY_COMPLEX_SMALL,
-                                                    1, (0, 0, 255), thickness=1, lineType=2)
+                                        mensaje = {
+                                            'name': result_names,
+                                            'proba': best_class_probabilities[0]
+                                        }
                     else:
-                        print('Unable to align')
-                # cv2.imshow('Image', frame)
-                filePath = os.path.join(str(self.img_path).replace('.', '') + 'last.jpg')
-                if os.path.exists(filePath):
-                    os.remove(filePath)
-                print('R: ' + filePath)
-                cv2.imwrite(filePath, frame)
-
+                        print(str(datetime.datetime.utcnow()) + 'Unable to align')
+                os.remove(self.img_path)
+                # cv2.imwrite(filePath, frame)
+                print(str(datetime.datetime.utcnow()) + str(mensaje))
                 return mensaje
-                # if cv2.waitKey(1000000) & 0xFF == ord('q'):
-                #   sys.exit("Thanks")
-                # cv2.destroyAllWindows()

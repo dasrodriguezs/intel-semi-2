@@ -1,43 +1,29 @@
-import datetime
 import os
-from flask import Flask, request, render_template, url_for, redirect
+
+from flask import Flask, request, jsonify
+
 from static.code.identify_face_image import identify_face
 
 app = Flask(__name__)
 algo = identify_face('')
 
 
-# last_file = None
-
-
-@app.route('/')
-def home_page():
-    return render_template('index.html', css_path=os.path.join('static', 'layout.css'))
-
-
-@app.route('/index')
-def index_page():
-    return render_template('index.html', css_path=os.path.join('static', 'layout.css'))
-
-
 @app.route("/upload", methods=['POST'])
 def upload():
     if 'photo' in request.files:
-        print(str(datetime.datetime.utcnow()) + ' - prin 1')
         photo = request.files['photo']
         if photo.filename != '':
             last_file = os.path.join('static', 'images', photo.filename)
             location = os.path.join('static', 'images', photo.filename)
             photo.save(last_file)
             algo.img_path = location
-            print(str(datetime.datetime.utcnow()) + ' - prin 2')
-            mensaje = algo.identify()
-            print(str(datetime.datetime.utcnow()) + ' - prin 3')
-            last = os.path.join('static', 'images', str(photo.filename).replace('.', '') + 'last.jpg')
-            print(last)
-            print(mensaje)
-            return render_template('index.html', image=last, css_path=os.path.join('static', 'layout.css'), mensaje=mensaje)
-        return render_template('home.html')
+            mensaje = algo.identify
+            if mensaje.get('proba') > 0.5:
+                return jsonify(mensaje), 200
+            else:
+                return jsonify(mensaje), 403
+        return jsonify({'error': 'no photo provided'}), 400
+    return jsonify({'error': 'no image provided'}), 400
 
 
 if __name__ == '__main__':

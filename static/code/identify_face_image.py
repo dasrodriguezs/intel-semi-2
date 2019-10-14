@@ -26,7 +26,7 @@ class identify_face:
                 self.pnet, self.rnet, self.onet = detect_face.create_mtcnn(self.sess, npy)
                 HumanNames = os.listdir(train_img)
                 HumanNames.sort()
-                print(str(datetime.datetime.utcnow()) + 'Loading feature extraction model')
+                print(str(datetime.datetime.utcnow()) + ' Loading feature extraction model')
                 facenet.load_model(modeldir)
                 self.images_placeholder = tf.get_default_graph().get_tensor_by_name("input:0")
                 self.embeddings = tf.get_default_graph().get_tensor_by_name("embeddings:0")
@@ -88,7 +88,7 @@ class identify_face:
 
                             # inner exception
                             if bb[i][0] <= 0 or bb[i][1] <= 0 or bb[i][2] >= len(frame[0]) or bb[i][3] >= len(frame):
-                                print(str(datetime.datetime.utcnow()) + ' face is too close')
+                                print(str(datetime.datetime.utcnow()) + ' Face is too close')
                                 continue
 
                             cropped.append(frame[bb[i][1]:bb[i][3], bb[i][0]:bb[i][2], :])
@@ -118,8 +118,8 @@ class identify_face:
                                             'proba': best_class_probabilities[0]
                                         })
                     else:
-                        print(str(datetime.datetime.utcnow()) + 'Unable to align')
+                        print(str(datetime.datetime.utcnow()) + ' Unable to align')
                 # os.remove(self.img_path)
                 # cv2.imwrite(filePath, frame)
-                print(str(datetime.datetime.utcnow()) + str(mensaje))
+                print(str(datetime.datetime.utcnow()) + ' ' + str(mensaje))
                 return mensaje

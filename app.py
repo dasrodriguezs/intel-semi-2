@@ -1,9 +1,8 @@
+import datetime
 import os
-
 import uuid
 
 from flask import Flask, request, jsonify
-
 from static.code.identify_face_image import identify_face
 
 app = Flask(__name__)
@@ -18,6 +17,7 @@ def upload():
             location = os.path.join('static', 'images', str(uuid.uuid4()) + photo.filename)
             photo.save(location)
             algo.img_path = location
+            print(str(datetime.datetime.utcnow()) + ' ID: ' + request.form.get('id'))
             mensaje = algo.identify
             aut = {'list': []}
             for obj in mensaje.get('list'):

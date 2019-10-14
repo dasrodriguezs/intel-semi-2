@@ -1,5 +1,7 @@
 import os
 
+import uuid
+
 from flask import Flask, request, jsonify
 
 from static.code.identify_face_image import identify_face
@@ -13,19 +15,18 @@ def upload():
     if 'photo' in request.files:
         photo = request.files['photo']
         if photo.filename != '':
-            last_file = os.path.join('static', 'images', photo.filename)
-            location = os.path.join('static', 'images', photo.filename)
-            photo.save(last_file)
+            location = os.path.join('static', 'images', str(uuid.uuid4()) + photo.filename)
+            photo.save(location)
             algo.img_path = location
             mensaje = algo.identify
-            aut = {'list':[]}
+            aut = {'list': []}
             for obj in mensaje.get('list'):
                 if obj.get('proba') > 0.5:
                     aut.get('list').append(obj)
-            if len(aut.get('list')) > 1:
+            if len(aut.get('list')) > 0:
                 return jsonify(aut), 200
             else:
-                return jsonify(mensaje), 403
+                return jsonify(aut), 403
         return jsonify({'error': 'no photo provided'}), 400
     return jsonify({'error': 'no image provided'}), 400
 

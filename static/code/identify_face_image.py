@@ -102,7 +102,7 @@ class identify_face:
                             emb_array[0, :] = self.sess.run(self.embeddings, feed_dict=feed_dict)
 
                             predictions = model.predict_proba(emb_array)
-                            print(str(datetime.datetime.utcnow()) + 'Predictions: ' + str(predictions))
+                            print(str(datetime.datetime.utcnow()) + ' Predictions: ' + str(predictions))
                             best_class_indices = np.argmax(predictions, axis=1)
                             best_class_probabilities = predictions[
                                 np.arange(len(best_class_indices)), best_class_indices]
@@ -119,7 +119,7 @@ class identify_face:
                                         })
                     else:
                         print(str(datetime.datetime.utcnow()) + 'Unable to align')
-                os.remove(self.img_path)
+                # os.remove(self.img_path)
                 # cv2.imwrite(filePath, frame)
                 print(str(datetime.datetime.utcnow()) + str(mensaje))
                 return mensaje
